@@ -54,4 +54,48 @@ module AdjMon where
                                           ≅⟨ fcomp R ⟩
                                           HMap R (right g) ∙C HMap R (right f) ∎)
 
-  
+--Functores para adjunción de Kleisli (ref. http://www.cs.nott.ac.uk/~psztxa/monads-more-1.pdf)
+
+kL :  ∀{a b}{ C : Cat {a} {b}}{M : Monad C} → Fun C (kleisliC M)
+kL {a}{b}{C}{M = monad T return bind mlaw1 mlaw2 mlaw3} = let open Cat C renaming (iden to idenC; _∙_ to _∙C_; idr to idrC; idl to idlC; ass to assC) in 
+                                      functor id
+                                                  (λ f → return ∙C f) --f de x en y, necesito x en y (en kC) o sea x en t y
+                                                 idrC --return ∙ id = return
+                                                  (λ {x} {y} {z} {f} {g} → proof
+                                                                                           return ∙C f ∙C g
+                                                                                           ≅⟨ sym assC ⟩
+                                                                                            (return ∙C f) ∙C g 
+                                                                                            ≅⟨ cong₂ _∙C_ (sym mlaw2) refl ⟩
+                                                                                            (bind (return ∙C f) ∙C return) ∙C g --introduzco bind return
+                                                                                            ≅⟨ assC ⟩
+                                                                                            bind (return ∙C f) ∙C return ∙C g ∎)
+
+kR :  ∀{a b}{ C : Cat {a} {b}}{M : Monad C} → Fun (kleisliC M) C
+kR {a}{b}{C}{M = monad T return bind mlaw1 mlaw2 mlaw3} = let open Cat C renaming (iden to idenC; _∙_ to _∙C_; idr to idrC; idl to idlC; ass to assC) in
+                                     functor T -- el mapeo de objetos es la función de la mónada 
+                                                 bind --tengo x en t y, necesito tx en ty 
+                                                 mlaw1 --bind id = idenC -> bind return = idenC
+                                                 mlaw3 -- bind (f ∙kC g) = bind f ∙C bind g -> bind (bind f ∙ g) = bind f ∙C bind g
+
+--Adjunción de Kleisli
+MonToAdj : ∀{a b}{ C : Cat {a} {b}}{M : Monad C} → Adj C (kleisliC M)
+MonToAdj {a}{b}{C}{M = monad T return bind mlaw1 mlaw2 mlaw3} = let open Cat C renaming (iden to idenC; _∙_ to _∙C_; idr to idrC; idl to idlC; ass to assC) in 
+                                    adjunction (kL {a} {b} {C} {monad T return bind mlaw1 mlaw2 mlaw3})
+                                                     (kR  {a} {b} {C} {monad T return bind mlaw1 mlaw2 mlaw3}) 
+                                                     id 
+                                                     id 
+                                                     (λ f → refl)
+                                                     (λ f → refl) 
+                                                     (λ f g h → proof 
+                                                                     (bind g) ∙C (h ∙C f)
+                                                                     ≅⟨ cong₂ _∙C_ refl (cong₂ _∙C_ (sym mlaw2) refl) ⟩ --introduzco bind return
+                                                                     (bind g) ∙C ((bind h) ∙C return) ∙C f
+                                                                     ≅⟨ cong₂ _∙C_ refl  assC ⟩
+                                                                     (bind g) ∙C (bind h) ∙C (return ∙C f) ∎)
+                                                     (λ f g h → proof 
+                                                                     (bind g) ∙C (h ∙C f)
+                                                                     ≅⟨ cong₂ _∙C_ refl (cong₂ _∙C_ (sym mlaw2) refl) ⟩ --introduzco bind return
+                                                                     (bind g) ∙C ((bind h) ∙C return) ∙C f
+                                                                     ≅⟨ cong₂ _∙C_ refl  assC ⟩
+                                                                     (bind g) ∙C (bind h) ∙C (return ∙C f) ∎) 
+                                                     

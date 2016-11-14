@@ -109,34 +109,6 @@ compHNat {G = G} {J} η ε = compVNat (compNatF ε G) (compFNat J η)
 
 
 -- La composición horizontal es asociativa
-NatTEq2 : ∀ {a b c d}{C : Cat {a} {b}}{D : Cat {c} {d}}{F G F' G' : Fun C D}
-            {α : NatT F G}{β : NatT F' G'}
-          → F ≅ F' → G ≅ G'  
-          → (∀{X} → NatT.cmp α {X} ≅ NatT.cmp β {X})
-          → α ≅ β
-NatTEq2 ff gg p with iext (λ X → p {X})
-NatTEq2 {F = F} {G} {.F} {.G} {natural cmp _} {natural .cmp _} refl refl p | refl =
-    cong (natural cmp) (iext λ _ → iext λ _ → iext λ _ → ir _ _)
-
-
-compHNat-assoc : ∀{a1 b1 a2 b2 a3 b3 a4 b4}
-                  {C1 : Cat {a1} {b1}}{C2 : Cat {a2} {b2}}{C3 : Cat {a3} {b3}}{C4 : Cat {a4} {b4}}
-                  {F G : Fun C1 C2}{J K : Fun C2 C3}{L M : Fun C3 C4} 
-               → (η1 : NatT F G)(η2 : NatT J K)(η3 : NatT L M)
-               → compHNat (compHNat η1 η2) η3 ≅ compHNat η1 (compHNat η2 η3)
-compHNat-assoc {C3 = C3}{C4 = C4}{J = J}{L = L}
-               (natural cmp1 _) (natural cmp2 _) (natural cmp3 _) =
-                   let   _∙4_ = Cat._∙_ C4
-                         _∙3_ = Cat._∙_ C3                         
-                   in NatTEq2 (Functor-Eq refl refl)
-                              (Functor-Eq refl refl)
-                              (proof
-                                cmp3 ∙4 (HMap L (cmp2 ∙3 (HMap J cmp1)))
-                               ≅⟨ cong (_∙4_ cmp3) (fcomp L) ⟩
-                                (cmp3 ∙4 (HMap L cmp2 ∙4 HMap L (HMap J cmp1)))
-                               ≅⟨ sym (Cat.ass C4) ⟩
-                                ((cmp3 ∙4 HMap L cmp2) ∙4  (HMap L (HMap J cmp1)))
-                               ∎)
 
 -- ley de intercambio
 interchange : ∀{a b c d e f}{C : Cat {a} {b}}{D : Cat {c} {d}}{E : Cat {e} {f}}
