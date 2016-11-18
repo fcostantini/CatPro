@@ -78,8 +78,8 @@ kR {a}{b}{C}{M = monad T return bind mlaw1 mlaw2 mlaw3} = let open Cat C renamin
                                                  mlaw3 -- bind (f ∙kC g) = bind f ∙C bind g -> bind (bind f ∙ g) = bind f ∙C bind g
 
 --Adjunción de Kleisli
-MonToAdj : ∀{a b}{ C : Cat {a} {b}}{M : Monad C} → Adj C (kleisliC M)
-MonToAdj {a}{b}{C}{M = monad T return bind mlaw1 mlaw2 mlaw3} = let open Cat C renaming (iden to idenC; _∙_ to _∙C_; idr to idrC; idl to idlC; ass to assC) in 
+MonToAdj : ∀{a b}{ C : Cat {a} {b}} → (M : Monad C) → Adj C (kleisliC M)
+MonToAdj {a}{b}{C}(monad T return bind mlaw1 mlaw2 mlaw3) = let open Cat C renaming (iden to idenC; _∙_ to _∙C_; idr to idrC; idl to idlC; ass to assC) in 
                                     adjunction (kL {a} {b} {C} {monad T return bind mlaw1 mlaw2 mlaw3})
                                                      (kR  {a} {b} {C} {monad T return bind mlaw1 mlaw2 mlaw3}) 
                                                      id 
@@ -99,3 +99,11 @@ MonToAdj {a}{b}{C}{M = monad T return bind mlaw1 mlaw2 mlaw3} = let open Cat C r
                                                                      ≅⟨ cong₂ _∙C_ refl  assC ⟩
                                                                      (bind g) ∙C (bind h) ∙C (return ∙C f) ∎) 
                                                      
+MonToMon : ∀{a b}{ C : Cat {a} {b}} → (M : Monad C) → AdjToMon (MonToAdj {a}{b}{C} M) ≅ M
+MonToMon (monad T return bind mlaw1 mlaw2 mlaw3) = proof AdjToMon (MonToAdj (monad T return bind mlaw1 mlaw2 mlaw3))
+                                                                                            ≅⟨ {!!}  ⟩
+                                                                                           {!!}
+                                                                                           ≅⟨ {!!} ⟩
+                                                                                          {!!}
+                                                                                          ≅⟨ {!!} ⟩
+                                                                                          monad T return bind mlaw1 mlaw2 mlaw3 ∎
