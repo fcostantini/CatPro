@@ -21,20 +21,22 @@ record Monad {a}{b}(C : Cat {a}{b}) : Set (a ⊔ b) where
 
 --Categoría Kleisli de una mónada
 kleisliC : ∀{a b}{C : Cat {a} {b}} → (M : Monad C) → Cat {a} {b}
-kleisliC {a}{b}{C} (monad T return bind mlaw1 mlaw2 mlaw3) = let open Cat C renaming (Obj to ObjC; Hom to HomC; iden to idenC; idr to idrC; idl to idlC; ass to assC) in record
+kleisliC {a}{b}{C} (monad T return bind mlaw1 mlaw2 mlaw3) = let open Cat C renaming (_∙_ to _∙C_; Obj to ObjC; Hom to HomC; iden to idenC; idr to idrC; idl to idlC; ass to assC) in record
                                                                                  { Obj = ObjC
-                                                                                 ; Hom = λ X Y → HomC X (T Y)
-                                                                                 ; iden = return
-                                                                                 ; _∙_ = λ f g → (bind f) ∙ g --g va de x a ty, bind f va de ty a tz
-                                                                                 ; idl = λ {x} {y} {f} → proof bind return ∙ f --iden ∙ f = f
-                                                                                                                    ≅⟨ congl mlaw1 ⟩
-                                                                                                                    idenC ∙ f
+                                                                                 ; Hom = λ X Y → HomC X (T Y) --un homomorfismo de X a Y es uno de X a TY en C
+                                                                                 ; iden = return -- X en X => X en TX en C
+                                                                                 ; _∙_ = λ f g → (bind f) ∙C g --g va de X a TY, f va de Y a TZ => bind f va de TY a TZ
+                                                                                 ; idl = λ {x} {y} {f} → proof --iden ∙ f ≅ f o sea (bind return) ∙C f ≅ f
+                                                                                                                    bind return ∙C f
+                                                                                                                    ≅⟨ cong₂ _∙C_ mlaw1 refl ⟩
+                                                                                                                    idenC ∙C f
                                                                                                                     ≅⟨ idlC ⟩
                                                                                                                     f ∎
-                                                                                 ; idr = mlaw2 --f ∙ iden = f                                     
-                                                                                 ; ass = λ {w} {x} {y} {z} {f} {g} {h} → proof bind (bind f ∙ g) ∙ h --(f ∙ g) ∙ h = f ∙ (g ∙ h)
-                                                                                                                                                   ≅⟨ congl mlaw3 ⟩
-                                                                                                                                                   (bind f ∙ bind g) ∙ h
+                                                                                 ; idr = mlaw2 -- f ∙ iden ≅ f  o sea (bind f) ∙C return ≅ f                                  
+                                                                                 ; ass = λ {w} {x} {y} {z} {f} {g} {h} → proof --(f ∙ g) ∙ h ≅ f ∙ (g ∙ h) o sea bind (bind f ∙C g) ∙C h ≅ bind f ∙C (bind g ∙C h)
+                                                                                                                                                   bind (bind f ∙C g) ∙C h 
+                                                                                                                                                   ≅⟨ cong₂ _∙C_ mlaw3 refl ⟩
+                                                                                                                                                   (bind f ∙C bind g) ∙C h
                                                                                                                                                    ≅⟨ assC ⟩
-                                                                                                                                                   bind f ∙ bind g ∙ h ∎
+                                                                                                                                                   bind f ∙C bind g ∙C h ∎
                                                                                  }
